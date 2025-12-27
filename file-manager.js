@@ -189,53 +189,6 @@ class FileManager extends HTMLElement {
   }
   
   // API Service Methods
-  async login(user, password) {
-    // eXide login endpoint: /exist/apps/jinks/login
-    const url = `${this.apiBase}/api/login/`;
-    
-    // Create form data
-    const formData = new URLSearchParams();
-    formData.append('user', user);
-    formData.append('password', password);
-    
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: formData.toString()
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Login HTTP error:', response.status, errorText);
-        throw new Error(`HTTP error! status: ${response.status} - ${errorText.substring(0, 100)}`);
-      }
-      
-      // Try to parse as JSON, but handle non-JSON responses
-      const contentType = response.headers.get('content-type') || '';
-      let result;
-      
-      if (contentType.includes('application/json') || contentType.includes('text/javascript')) {
-        const text = await response.text();
-        try {
-          result = JSON.parse(text);
-        } catch (e) {
-          result = { success: true, message: text };
-        }
-      } else {
-        const text = await response.text();
-        result = { success: true, message: text };
-      }
-      
-      return result;
-    } catch (error) {
-      console.error('Error logging in:', error);
-      this.showError(`Failed to login: ${error.message}`);
-      throw error;
-    }
-  }
   
   async fetchCollections(path, start = 0, end = this.pageSize) {
     const url = `${this.apiBase}/api/collections/${encodeURIComponent(path)}?start=${start}&end=${end}`;

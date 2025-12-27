@@ -144,18 +144,6 @@
   </div>
   
   <script type="module" src="file-manager.js"></script>
-  <script type="module">
-    // Wait for the custom element to be defined and then call login
-    customElements.whenDefined('jinks-file-manager').then(() => {
-      const fileManager = document.getElementById('fileManager');
-      if (fileManager) {
-        // Call login when component is ready
-        fileManager.login('tei', 'simple')
-          .then(() => console.log('Login successful'))
-          .catch(error => console.error('Login failed:', error));
-      }
-    });
-  </script>
 </body>
 </html>
 
