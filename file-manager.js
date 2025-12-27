@@ -937,7 +937,11 @@ class FileManager extends HTMLElement {
     
     // Handle folder navigation
     if (item.type === 'collection' || gridItem.classList.contains('folder')) {
-      if (e.detail === 2 || (e.detail === 1 && e.target.closest('.item-icon'))) {
+      // If modifier keys are held (shift, ctrl, cmd), always select, never navigate
+      if (e.shiftKey || e.ctrlKey || e.metaKey) {
+        // Modifier keys held - always select
+        this.toggleSelection(path, e);
+      } else if (e.detail === 2 || (e.detail === 1 && e.target.closest('.item-icon'))) {
         // Double click or click on icon - navigate
         this.navigateTo(path);
       } else {
