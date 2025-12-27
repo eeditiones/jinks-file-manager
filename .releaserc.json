@@ -2,6 +2,8 @@
   "branches": [
     "main"
   ],
+  "repositoryUrl": "https://github.com/eeditiones/jinks-file-manager",
+  "debug": true,
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
