@@ -1,13 +1,31 @@
 {
-  "name": "jinks-file-manager",
+  "name": "@teipublisher/jinks-file-manager",
   "version": "1.0.0",
   "description": "Lightweight file manager web component for eXist-db",
   "license": "GPL-3.0-or-later",
   "type": "module",
+  "main": "dist/jinks-file-manager.js",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eeditiones/jinks-file-manager.git"
+  },
+  "keywords": [
+    "file-manager",
+    "web-component",
+    "exist-db",
+    "jinks",
+    "file-browser"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "vite": "^5.0.0"
