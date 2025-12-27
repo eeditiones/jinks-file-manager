@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/eeditiones/jinks-file-manager/compare/v1.0.0...v1.0.1) (2025-12-27)
+
+
+### Bug Fixes
+
+* shift-click on collection should select it, not navigate to it ([c182bf7](https://github.com/eeditiones/jinks-file-manager/commit/c182bf7703a71c8a8bcd1bb9bd4a4479007ea4ab))
+
 # 1.0.0 (2025-12-27)
 
 

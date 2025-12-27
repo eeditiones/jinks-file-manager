@@ -32,5 +32,6 @@
     "@semantic-release/git": "^10.0.1",
     "semantic-release": "^22.0.12",
     "vite": "^5.0.0"
-  }
+  },
+  "version": "1.0.1"
 }
