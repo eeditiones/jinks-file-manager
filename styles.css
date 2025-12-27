@@ -5,17 +5,68 @@
   display: block;
   width: 100%;
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  font-size: 14px;
-  color: #333;
+  font-size: var(--jinks-file-manager-font-size);
+  color: var(--jinks-file-manager-color-text);
+  
+  /* Font size */
+  --jinks-file-manager-font-size: 1rem;
+  --jinks-file-manager-font-size-small: 0.875rem;
+  --jinks-file-manager-font-size-medium: 1.125rem;
+
+  /* Base color palette */
+  --jinks-file-manager-color-lightest: #fff;
+  --jinks-file-manager-color-light: #f5f5f5;
+  --jinks-file-manager-color-medium: #e0e0e0;
+  --jinks-file-manager-color-dark: #999;
+  --jinks-file-manager-color-darker: #666;
+  --jinks-file-manager-color-darkest: #333;
+  --jinks-file-manager-color-primary: #2196f3;
+  --jinks-file-manager-color-primary-dark: #1976d2;
+  --jinks-file-manager-color-primary-darker: #1565c0;
+  --jinks-file-manager-color-error: #f44336;
+  --jinks-file-manager-color-success: #4caf50;
+  --jinks-file-manager-color-folder: #ffa726;
+  
+  /* Derived colors - backgrounds (dynamically computed) */
+  --jinks-file-manager-bg-primary: var(--jinks-file-manager-color-lightest);
+  --jinks-file-manager-bg-secondary: color-mix(in srgb, var(--jinks-file-manager-color-lightest) 95%, var(--jinks-file-manager-color-light));
+  --jinks-file-manager-bg-hover: color-mix(in srgb, var(--jinks-file-manager-color-light) 80%, var(--jinks-file-manager-color-medium));
+  --jinks-file-manager-bg-active: color-mix(in srgb, var(--jinks-file-manager-color-medium) 70%, var(--jinks-file-manager-color-dark));
+  --jinks-file-manager-bg-selected: color-mix(in srgb, var(--jinks-file-manager-color-primary) 10%, transparent);
+  --jinks-file-manager-bg-error: color-mix(in srgb, var(--jinks-file-manager-color-error) 10%, transparent);
+  --jinks-file-manager-bg-success: color-mix(in srgb, var(--jinks-file-manager-color-success) 10%, transparent);
+  --jinks-file-manager-bg-scrollbar-track: color-mix(in srgb, var(--jinks-file-manager-color-lightest) 90%, var(--jinks-file-manager-color-light));
+  --jinks-file-manager-bg-scrollbar-thumb: color-mix(in srgb, var(--jinks-file-manager-color-medium) 50%, var(--jinks-file-manager-color-dark));
+  --jinks-file-manager-bg-scrollbar-thumb-hover: color-mix(in srgb, var(--jinks-file-manager-color-dark) 60%, var(--jinks-file-manager-color-darker));
+  
+  /* Derived colors - text (direct references) */
+  --jinks-file-manager-color-text: var(--jinks-file-manager-color-darkest);
+  --jinks-file-manager-color-text-secondary: var(--jinks-file-manager-color-darker);
+  --jinks-file-manager-color-text-muted: var(--jinks-file-manager-color-dark);
+  --jinks-file-manager-color-text-selected: var(--jinks-file-manager-color-primary-dark);
+  --jinks-file-manager-color-text-error: color-mix(in srgb, var(--jinks-file-manager-color-error) 60%, var(--jinks-file-manager-color-darkest));
+  --jinks-file-manager-color-text-success: color-mix(in srgb, var(--jinks-file-manager-color-success) 60%, var(--jinks-file-manager-color-darkest));
+  
+  /* Derived colors - borders (dynamically computed from base colors) */
+  --jinks-file-manager-border-default: var(--jinks-file-manager-color-medium);
+  --jinks-file-manager-border-button: color-mix(in srgb, var(--jinks-file-manager-color-medium) 80%, var(--jinks-file-manager-color-darkest));
+  --jinks-file-manager-border-hover: color-mix(in srgb, var(--jinks-file-manager-color-medium) 50%, var(--jinks-file-manager-color-dark));
+  --jinks-file-manager-border-selected: var(--jinks-file-manager-color-primary);
+  --jinks-file-manager-border-info: color-mix(in srgb, var(--jinks-file-manager-color-primary) 60%, var(--jinks-file-manager-color-lightest));
+  --jinks-file-manager-border-error: color-mix(in srgb, var(--jinks-file-manager-color-error) 80%, var(--jinks-file-manager-color-lightest));
+  --jinks-file-manager-border-success: color-mix(in srgb, var(--jinks-file-manager-color-success) 80%, var(--jinks-file-manager-color-lightest));
+  
+  /* Derived colors - button states (dynamically computed) */
+  --jinks-file-manager-color-error-hover: color-mix(in srgb, var(--jinks-file-manager-color-error) 50%, var(--jinks-file-manager-color-darkest));
+  --jinks-file-manager-color-success-hover: color-mix(in srgb, var(--jinks-file-manager-color-success) 50%, var(--jinks-file-manager-color-darkest));
 }
 
 .file-manager {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #fff;
-  border: 1px solid #e0e0e0;
+  background: var(--jinks-file-manager-bg-primary);
+  border: 1px solid var(--jinks-file-manager-border-default);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -26,8 +77,8 @@
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--jinks-file-manager-bg-secondary);
+  border-bottom: 1px solid var(--jinks-file-manager-border-default);
   flex-shrink: 0;
 }
 
@@ -36,22 +87,22 @@
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
-  background: #fff;
-  border: 1px solid #d0d0d0;
+  background: var(--jinks-file-manager-bg-primary);
+  border: 1px solid var(--jinks-file-manager-border-button);
   border-radius: 4px;
   cursor: pointer;
-  font-size: 13px;
-  color: #333;
+  font-size: var(--jinks-file-manager-font-size-small);
+  color: var(--jinks-file-manager-color-text);
   transition: all 0.2s;
 }
 
 .toolbar button:hover:not(:disabled) {
-  background: #f0f0f0;
-  border-color: #b0b0b0;
+  background: var(--jinks-file-manager-bg-hover);
+  border-color: var(--jinks-file-manager-border-hover);
 }
 
 .toolbar button:active:not(:disabled) {
-  background: #e8e8e8;
+  background: var(--jinks-file-manager-bg-active);
 }
 
 .toolbar button:disabled {
@@ -72,11 +123,11 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: #e3f2fd;
-  border: 1px solid #90caf9;
+  background: var(--jinks-file-manager-bg-selected);
+  border: 1px solid var(--jinks-file-manager-border-info);
   border-radius: 4px;
-  font-size: 12px;
-  color: #1976d2;
+  font-size: var(--jinks-file-manager-font-size-small);
+  color: var(--jinks-file-manager-color-text-selected);
 }
 
 .clipboard-indicator svg {
@@ -89,8 +140,8 @@
   align-items: center;
   gap: 4px;
   padding: 8px 16px;
-  background: #fafafa;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--jinks-file-manager-bg-secondary);
+  border-bottom: 1px solid var(--jinks-file-manager-border-default);
   flex-shrink: 0;
   overflow-x: auto;
 }
@@ -103,19 +154,19 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 13px;
-  color: #666;
+  font-size: var(--jinks-file-manager-font-size-small);
+  color: var(--jinks-file-manager-color-text-secondary);
   transition: all 0.2s;
   white-space: nowrap;
 }
 
 .breadcrumb-item:hover:not(.current) {
-  background: #f0f0f0;
-  color: #333;
+  background: var(--jinks-file-manager-bg-hover);
+  color: var(--jinks-file-manager-color-text);
 }
 
 .breadcrumb-item.current {
-  color: #333;
+  color: var(--jinks-file-manager-color-text);
   font-weight: 500;
   cursor: default;
 }
@@ -136,7 +187,7 @@
 }
 
 .breadcrumb-separator {
-  color: #999;
+  color: var(--jinks-file-manager-color-text-muted);
   user-select: none;
 }
 
@@ -151,7 +202,7 @@
 
 .content.drag-over {
   background: rgba(33, 150, 243, 0.1);
-  border: 2px dashed #2196f3;
+  border: 2px dashed var(--jinks-file-manager-color-primary);
   border-radius: 8px;
 }
 
@@ -162,7 +213,9 @@
   gap: 16px;
   padding: 16px;
   overflow-y: auto;
+  overflow-x: hidden;
   align-content: start;
+  min-height: 0;
 }
 
 .grid-item {
@@ -174,20 +227,20 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
-  background: #fff;
+  background: var(--jinks-file-manager-bg-primary);
   position: relative;
 }
 
 .grid-item:hover {
-  background: #f8f9fa;
-  border-color: #e0e0e0;
+  background: var(--jinks-file-manager-bg-secondary);
+  border-color: var(--jinks-file-manager-border-default);
   transform: translateY(-2px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .grid-item.selected {
-  background: #e3f2fd;
-  border-color: #2196f3;
+  background: var(--jinks-file-manager-bg-selected);
+  border-color: var(--jinks-file-manager-border-selected);
 }
 
 .grid-item.folder {
@@ -201,7 +254,7 @@
   width: 64px;
   height: 64px;
   margin-bottom: 8px;
-  color: #666;
+  color: var(--jinks-file-manager-color-text-secondary);
   transition: color 0.2s;
   position: relative;
 }
@@ -211,7 +264,7 @@
   height: 100%;
   object-fit: contain;
   border-radius: 4px;
-  background: #f5f5f5;
+  background: var(--jinks-file-manager-color-gray-light);
 }
 
 .item-icon .thumbnail-fallback {
@@ -222,17 +275,17 @@
 }
 
 .grid-item.folder .item-icon {
-  color: #ffa726;
+  color: var(--jinks-file-manager-color-folder);
 }
 
 .grid-item.selected .item-icon {
-  color: #2196f3;
+  color: var(--jinks-file-manager-color-primary);
 }
 
 .item-name {
   text-align: center;
-  font-size: 12px;
-  color: #333;
+  font-size: var(--jinks-file-manager-font-size-small);
+  color: var(--jinks-file-manager-color-text);
   word-break: break-word;
   max-width: 100%;
   overflow: hidden;
@@ -244,7 +297,7 @@
 }
 
 .grid-item.selected .item-name {
-  color: #1976d2;
+  color: var(--jinks-file-manager-color-text-selected);
   font-weight: 500;
 }
 
@@ -256,14 +309,14 @@
   justify-content: center;
   gap: 12px;
   padding: 40px;
-  color: #666;
+  color: var(--jinks-file-manager-color-text-secondary);
 }
 
 .spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #2196f3;
+  border: 3px solid var(--jinks-file-manager-color-gray-light);
+  border-top: 3px solid var(--jinks-file-manager-color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -278,26 +331,26 @@
   display: flex;
   justify-content: center;
   padding: 16px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--jinks-file-manager-border-default);
 }
 
 .btn-load-more {
   padding: 10px 20px;
-  background: #2196f3;
+  background: var(--jinks-file-manager-color-primary);
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--jinks-file-manager-font-size-small);
   transition: background 0.2s;
 }
 
 .btn-load-more:hover {
-  background: #1976d2;
+  background: var(--jinks-file-manager-color-primary-dark);
 }
 
 .btn-load-more:active {
-  background: #1565c0;
+  background: var(--jinks-file-manager-color-primary-darker);
 }
 
 /* Empty State */
@@ -306,8 +359,8 @@
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
-  color: #999;
-  font-size: 14px;
+  color: var(--jinks-file-manager-color-text-muted);
+  font-size: var(--jinks-file-manager-font-size-small);
 }
 
 /* Message Footer */
@@ -316,30 +369,30 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: #e3f2fd;
-  border-top: 1px solid #90caf9;
-  color: #1976d2;
-  font-size: 14px;
+  background: var(--jinks-file-manager-bg-selected);
+  border-top: 1px solid var(--jinks-file-manager-border-info);
+  color: var(--jinks-file-manager-color-text-selected);
+  font-size: var(--jinks-file-manager-font-size-small);
   flex-shrink: 0;
   animation: slideUp 0.3s ease-out;
 }
 
 .message-footer.message-error {
-  background: #ffebee;
-  border-top-color: #ef5350;
-  color: #c62828;
+  background: var(--jinks-file-manager-bg-error);
+  border-top-color: var(--jinks-file-manager-border-error);
+  color: var(--jinks-file-manager-color-text-error);
 }
 
 .message-footer.message-success {
-  background: #e8f5e9;
-  border-top-color: #66bb6a;
-  color: #2e7d32;
+  background: var(--jinks-file-manager-bg-success);
+  border-top-color: var(--jinks-file-manager-border-success);
+  color: var(--jinks-file-manager-color-text-success);
 }
 
 .message-footer.message-info {
-  background: #e3f2fd;
-  border-top-color: #90caf9;
-  color: #1976d2;
+  background: var(--jinks-file-manager-bg-selected);
+  border-top-color: var(--jinks-file-manager-border-info);
+  color: var(--jinks-file-manager-color-text-selected);
 }
 
 .message-text {
@@ -353,9 +406,9 @@
   padding: 6px 12px;
   border: 1px solid currentColor;
   background: white;
-  color: #333;
+  color: var(--jinks-file-manager-color-text);
   border-radius: 4px;
-  font-size: 14px;
+  font-size: var(--jinks-file-manager-font-size-small);
   margin-right: 8px;
   opacity: 0.9;
   transition: opacity 0.2s;
@@ -369,15 +422,15 @@
 }
 
 .message-footer.message-error .message-input {
-  border-color: #c62828;
+  border-color: var(--jinks-file-manager-color-text-error);
 }
 
 .message-footer.message-info .message-input {
-  border-color: #1976d2;
+  border-color: var(--jinks-file-manager-color-text-selected);
 }
 
 .message-footer.message-success .message-input {
-  border-color: #2e7d32;
+  border-color: var(--jinks-file-manager-color-text-success);
 }
 
 .message-actions {
@@ -394,7 +447,7 @@
   color: inherit;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--jinks-file-manager-font-size-small);
   font-weight: 500;
   transition: all 0.2s;
   opacity: 0.9;
@@ -424,42 +477,42 @@
 
 /* Specific styling for error type confirm button */
 .message-footer.message-error .message-confirm-btn {
-  background: #c62828;
+  background: var(--jinks-file-manager-color-text-error);
   color: white;
-  border-color: #c62828;
+  border-color: var(--jinks-file-manager-color-text-error);
 }
 
 .message-footer.message-error .message-confirm-btn:hover {
-  background: #b71c1c;
+  background: var(--jinks-file-manager-color-error-hover);
 }
 
 /* Specific styling for info type confirm button */
 .message-footer.message-info .message-confirm-btn {
-  background: #1976d2;
+  background: var(--jinks-file-manager-color-text-selected);
   color: white;
-  border-color: #1976d2;
+  border-color: var(--jinks-file-manager-color-text-selected);
 }
 
 .message-footer.message-info .message-confirm-btn:hover {
-  background: #1565c0;
+  background: var(--jinks-file-manager-color-primary-darker);
 }
 
 /* Specific styling for success type confirm button */
 .message-footer.message-success .message-confirm-btn {
-  background: #2e7d32;
+  background: var(--jinks-file-manager-color-text-success);
   color: white;
-  border-color: #2e7d32;
+  border-color: var(--jinks-file-manager-color-text-success);
 }
 
 .message-footer.message-success .message-confirm-btn:hover {
-  background: #1b5e20;
+  background: var(--jinks-file-manager-color-success-hover);
 }
 
 .message-close {
   background: transparent;
   border: none;
   color: inherit;
-  font-size: 20px;
+  font-size: var(--jinks-file-manager-font-size-medium);
   line-height: 1;
   cursor: pointer;
   padding: 0;
@@ -497,13 +550,13 @@
 .context-menu {
   position: fixed;
   background: white;
-  border: 1px solid #d0d0d0;
+  border: 1px solid var(--jinks-file-manager-border-button);
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   padding: 4px;
   z-index: 10000;
   min-width: 180px;
-  font-size: 13px;
+  font-size: var(--jinks-file-manager-font-size-small);
 }
 
 .context-menu-item {
@@ -513,24 +566,24 @@
   padding: 8px 12px;
   cursor: pointer;
   border-radius: 4px;
-  color: #333;
+  color: var(--jinks-file-manager-color-text);
   transition: background 0.15s;
 }
 
 .context-menu-item:hover {
-  background: #f0f0f0;
+  background: var(--jinks-file-manager-bg-hover);
 }
 
 .context-menu-item svg {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  color: #666;
+  color: var(--jinks-file-manager-color-text-secondary);
 }
 
 .context-menu-separator {
   height: 1px;
-  background: #e0e0e0;
+  background: var(--jinks-file-manager-border-default);
   margin: 4px 0;
 }
 
@@ -553,7 +606,7 @@
   
   .toolbar button {
     padding: 6px 10px;
-    font-size: 12px;
+    font-size: var(--jinks-file-manager-font-size-small);
   }
 }
 
@@ -563,15 +616,15 @@
 }
 
 .grid-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--jinks-file-manager-bg-scrollbar-track);
 }
 
 .grid-container::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--jinks-file-manager-bg-scrollbar-thumb);
   border-radius: 4px;
 }
 
 .grid-container::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: var(--jinks-file-manager-bg-scrollbar-thumb-hover);
 }
 
