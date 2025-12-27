@@ -1,0 +1,161 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- SPDX-FileCopyrightText: 2025 e-editiones.org -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jinks File Manager</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    
+    .header {
+      padding: 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    
+    .header p {
+      opacity: 0.9;
+      font-size: 14px;
+    }
+    
+    .file-manager-wrapper {
+      height: 600px;
+      padding: 0;
+    }
+    
+    jinks-file-manager {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .info {
+      padding: 20px 24px;
+      background: #f8f9fa;
+      border-top: 1px solid #e0e0e0;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+    }
+    
+    .info h3 {
+      font-size: 14px;
+      margin-bottom: 12px;
+      color: #333;
+    }
+    
+    .info ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    
+    .info li {
+      margin-bottom: 8px;
+      padding-left: 20px;
+      position: relative;
+    }
+    
+    .info li:before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #667eea;
+      font-weight: bold;
+    }
+    
+    .info kbd {
+      background: #e9ecef;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+      font-size: 11px;
+      border: 1px solid #ced4da;
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      
+      .file-manager-wrapper {
+        height: 500px;
+      }
+      
+      .config-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>eXist-db File Manager</h1>
+      <p>Lightweight web component for browsing and managing eXist-db collections</p>
+    </div>
+    
+    <div class="file-manager-wrapper">
+      <jinks-file-manager
+        id="fileManager"
+        api-base="/exist/apps/jinks"
+        root="/db/apps/test"
+      ></jinks-file-manager>
+    </div>
+    
+    <div class="info">
+      <h3>Usage Instructions</h3>
+      <ul>
+        <li><strong>Navigate:</strong> Click folders or use breadcrumbs</li>
+        <li><strong>Select:</strong> Click items; <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> for multiple</li>
+        <li><strong>Copy/Cut:</strong> <kbd>Ctrl+C</kbd>/<kbd>Ctrl+X</kbd> or context menu</li>
+        <li><strong>Paste:</strong> <kbd>Ctrl+V</kbd> or Paste button</li>
+        <li><strong>Delete:</strong> <kbd>Delete</kbd> or context menu</li>
+        <li><strong>Rename:</strong> <kbd>F2</kbd> or context menu</li>
+        <li><strong>Upload:</strong> Click Upload button</li>
+      </ul>
+    </div>
+  </div>
+  
+  <script type="module" src="file-manager.js"></script>
+  <script type="module">
+    // Wait for the custom element to be defined and then call login
+    customElements.whenDefined('jinks-file-manager').then(() => {
+      const fileManager = document.getElementById('fileManager');
+      if (fileManager) {
+        // Call login when component is ready
+        fileManager.login('tei', 'simple')
+          .then(() => console.log('Login successful'))
+          .catch(error => console.error('Login failed:', error));
+      }
+    });
+  </script>
+</body>
+</html>
+
