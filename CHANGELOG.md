@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/eeditiones/jinks-file-manager/compare/v1.0.1...v1.1.0) (2025-12-29)
+
+
+### Features
+
+* add context menu and double click option to open file in eXide ([c6012c4](https://github.com/eeditiones/jinks-file-manager/commit/c6012c49e92aeaae88baf8705676ad9903a2fa3b))
+
 ## [1.0.1](https://github.com/eeditiones/jinks-file-manager/compare/v1.0.0...v1.0.1) (2025-12-27)
 
 
