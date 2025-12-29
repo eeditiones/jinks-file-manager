@@ -746,6 +746,93 @@ class FileManager extends HTMLElement {
     return `${restBase}${itemPath}`;
   }
   
+  // Helper method to get REST API URL for a file
+  getFileUrl(itemPath) {
+    const restBase = this.apiBase.replace('/apps/jinks', '/rest');
+    return `${restBase}${itemPath}`;
+  }
+  
+  // Fetch file content from REST API
+  async fetchFileContent(itemPath) {
+    const url = this.getFileUrl(itemPath);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.blob();
+    } catch (error) {
+      console.error('Error fetching file:', error);
+      throw error;
+    }
+  }
+  
+  // Download selected files to local directory using File System Access API
+  async downloadFilesToDirectory() {
+    // Check if File System Access API is supported
+    if (!('showDirectoryPicker' in window)) {
+      this.showError('File System Access API is not supported in this browser. Please use a modern browser like Chrome, Edge, or Opera.');
+      return;
+    }
+    
+    // Get selected items (only files, not collections)
+    const selectedPaths = Array.from(this.selectedItems);
+    const selectedItems = selectedPaths
+      .map(path => this.items.find(i => (i.path || i.name) === path))
+      .filter(item => item != null && item.type === 'resource');
+    
+    if (selectedItems.length === 0) {
+      this.showError('Please select at least one file to download.');
+      return;
+    }
+    
+    try {
+      // Let user select a directory
+      const directoryHandle = await window.showDirectoryPicker({
+        mode: 'readwrite'
+      });
+      
+      this.showMessage(`Downloading ${selectedItems.length} file(s)...`, 'info');
+      
+      // Download each file
+      let successCount = 0;
+      let errorCount = 0;
+      
+      for (const item of selectedItems) {
+        try {
+          const itemPath = item.path || item.name;
+          const fileName = item.name || itemPath.split('/').pop();
+          
+          // Fetch file content
+          const blob = await this.fetchFileContent(itemPath);
+          
+          // Create file in selected directory
+          const fileHandle = await directoryHandle.getFileHandle(fileName, { create: true });
+          const writable = await fileHandle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          
+          successCount++;
+        } catch (error) {
+          console.error(`Error downloading ${item.name}:`, error);
+          errorCount++;
+        }
+      }
+      
+      if (errorCount === 0) {
+        this.showMessage(`Successfully downloaded ${successCount} file(s) to selected directory.`);
+      } else {
+        this.showError(`Downloaded ${successCount} file(s), ${errorCount} failed.`);
+      }
+    } catch (error) {
+      // User cancelled or error occurred
+      if (error.name !== 'AbortError') {
+        console.error('Error downloading files:', error);
+        this.showError(`Failed to download files: ${error.message}`);
+      }
+    }
+  }
+  
   // UI Rendering
   renderGrid() {
     const gridContainer = this.shadowRoot.querySelector('.grid-container');
@@ -1409,13 +1496,23 @@ class FileManager extends HTMLElement {
     const editableTypes = ['xquery', 'javascript', 'css', 'xml', 'json', 'html'];
     const isEditable = fileType && editableTypes.includes(fileType);
     
+    // Check if any selected items are files (for download option)
+    const selectedPaths = Array.from(this.selectedItems);
+    const hasSelectedFiles = selectedPaths.some(path => {
+      const selectedItem = this.items.find(i => (i.path || i.name) === path);
+      return selectedItem && selectedItem.type === 'resource';
+    });
+    // Also check if the right-clicked item itself is a file
+    const isFile = item.type === 'resource';
+    const showDownload = (hasSelectedFiles || isFile) && 'showDirectoryPicker' in window;
+    
     contextMenu.innerHTML = `
       <div class="context-menu-item" data-action="open" ${item.type === 'collection' ? '' : 'style="display: none;"'}>
         <svg width="16" height="16" fill="currentColor"><use href="#icon-folder"></use></svg>
         Open
       </div>
       <div class="context-menu-item" data-action="open-exide" ${isEditable ? '' : 'style="display: none;"'}>
-        <svg width="16" height="16" fill="currentColor"><use href="#icon-file"></use></svg>
+        <svg width="16" height="16" fill="currentColor"><use href="#icon-edit"></use></svg>
         Open in eXide
       </div>
       <div class="context-menu-item" data-action="copy">
@@ -1423,7 +1520,7 @@ class FileManager extends HTMLElement {
         Copy
       </div>
       <div class="context-menu-item" data-action="cut">
-        <svg width="16" height="16" fill="currentColor"><use href="#icon-copy"></use></svg>
+        <svg width="16" height="16" fill="currentColor"><use href="#icon-cut"></use></svg>
         Cut
       </div>
       <div class="context-menu-item" data-action="copy-path">
@@ -1433,6 +1530,11 @@ class FileManager extends HTMLElement {
       <div class="context-menu-item" data-action="paste" ${this.clipboard ? '' : 'style="display: none;"'}>
         <svg width="16" height="16" fill="currentColor"><use href="#icon-clipboard"></use></svg>
         Paste
+      </div>
+      <div class="context-menu-separator" ${showDownload ? '' : 'style="display: none;"'}></div>
+      <div class="context-menu-item" data-action="download" ${showDownload ? '' : 'style="display: none;"'}>
+        <svg width="16" height="16" fill="currentColor"><use href="#icon-download"></use></svg>
+        Download to Folder
       </div>
       <div class="context-menu-separator"></div>
       <div class="context-menu-item" data-action="rename">
@@ -1472,6 +1574,9 @@ class FileManager extends HTMLElement {
         break;
       case 'open-exide':
         this.openInExide(path);
+        break;
+      case 'download':
+        this.downloadFilesToDirectory();
         break;
       case 'copy':
         // If the right-clicked item is not selected, select only it
