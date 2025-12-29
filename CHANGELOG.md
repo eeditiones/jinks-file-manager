@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/eeditiones/jinks-file-manager/compare/v1.1.0...v1.2.0) (2025-12-29)
+
+
+### Features
+
+* add download option to context menu where supported ([5121d69](https://github.com/eeditiones/jinks-file-manager/commit/5121d69c9728457670dddfd24dab2a95d85c9bac))
+
 # [1.1.0](https://github.com/eeditiones/jinks-file-manager/compare/v1.0.1...v1.1.0) (2025-12-29)
 
 
