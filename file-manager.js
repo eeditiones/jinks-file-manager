@@ -12,7 +12,7 @@ class FileManager extends HTMLElement {
     
     // Configuration properties
     this.apiBase = '/exist/apps/jinks'; // Use relative path for Vite proxy
-    this.root = '/db/apps/test';
+    this.root = '/db/apps/jinks';
     
     // State management
     this.currentPath = this.root;
@@ -781,13 +781,9 @@ class FileManager extends HTMLElement {
                 <svg width="48" height="48" fill="currentColor" class="thumbnail-fallback" style="display: none;"><use href="#icon-file"></use></svg>`;
       } else {
         const fileType = getFileType(item);
-        switch (fileType) {
-          case 'xml':
-          case 'json':
-          case 'css':
+        if (fileType) {
             icon = `<svg width="48" height="48" fill="currentColor"><use href="#icon-filetype-${fileType}"></use></svg>`;
-            break;
-          default:
+        } else {
             icon = `<svg width="48" height="48" fill="currentColor"><use href="#icon-file"></use></svg>`;
         }
       }
@@ -951,7 +947,18 @@ class FileManager extends HTMLElement {
         }
       }
     } else {
-      // File - just select
+      // File handling
+      if (e.detail === 2) {
+        // Double-click on file - check if it's an editable file type
+        const fileType = getFileType(item);
+        const editableTypes = ['xquery', 'javascript', 'css', 'xml', 'json', 'html'];
+        
+        if (fileType && editableTypes.includes(fileType)) {
+          this.openInExide(path);
+          return;
+        }
+      }
+      // Single click or non-editable file - just select
       this.toggleSelection(path, e);
     }
   }
@@ -1095,6 +1102,25 @@ class FileManager extends HTMLElement {
   }
   
   // Operations
+  openInExide(path) {
+    const exide = window.open('', 'eXide');
+    if (exide && !exide.closed) {
+      // check if eXide is really available or it's an empty page
+      const app = exide.eXide;
+      if (app) {
+        // eXide is there
+        exide.eXide.app.findDocument(path);
+        exide.focus();
+      } else {
+        window.eXide_onload = function () {
+          exide.eXide.app.findDocument(path);
+        };
+        const base = this.apiBase.replace('/apps/jinks', '/apps/eXide');
+        exide.location = `${base}/index.html`;
+      }
+    }
+  }
+  
   toggleSelection(path, e = null) {
     if (this.selectedItems.has(path)) {
       if (e && (e.ctrlKey || e.metaKey)) {
@@ -1378,10 +1404,19 @@ class FileManager extends HTMLElement {
     const path = item.path || item.name;
     const isSelected = this.selectedItems.has(path);
     
+    // Check if item is an editable file type for eXide
+    const fileType = item.type === 'resource' ? getFileType(item) : null;
+    const editableTypes = ['xquery', 'javascript', 'css', 'xml', 'json', 'html'];
+    const isEditable = fileType && editableTypes.includes(fileType);
+    
     contextMenu.innerHTML = `
       <div class="context-menu-item" data-action="open" ${item.type === 'collection' ? '' : 'style="display: none;"'}>
         <svg width="16" height="16" fill="currentColor"><use href="#icon-folder"></use></svg>
         Open
+      </div>
+      <div class="context-menu-item" data-action="open-exide" ${isEditable ? '' : 'style="display: none;"'}>
+        <svg width="16" height="16" fill="currentColor"><use href="#icon-file"></use></svg>
+        Open in eXide
       </div>
       <div class="context-menu-item" data-action="copy">
         <svg width="16" height="16" fill="currentColor"><use href="#icon-copy"></use></svg>
@@ -1434,6 +1469,9 @@ class FileManager extends HTMLElement {
     switch (action) {
       case 'open':
         this.navigateTo(path);
+        break;
+      case 'open-exide':
+        this.openInExide(path);
         break;
       case 'copy':
         // If the right-clicked item is not selected, select only it

@@ -20,13 +20,27 @@ export const MIME_TYPE_MAP = {
   'text/xml': 'xml',
   'application/xml-external-parsed-entity': 'xml',
   'application/xml-dtd': 'xml',
+  // XQuery
+  'application/xquery': 'xquery',
   // JSON
   'application/json': 'json',
   'text/json': 'json',
   'application/json-patch+json': 'json',
   'application/vnd.api+json': 'json',
+  // Javascript
+  'application/javascript': 'javascript',
+  'text/javascript': 'javascript',
+  'application/ecmascript': 'javascript',
+  'text/ecmascript': 'javascript',
   // CSS
-  'text/css': 'css'
+  'text/css': 'css',
+  // HTML
+  'text/html': 'html',
+  'application/xhtml+xml': 'html',
+  'application/xml+xhtml': 'html',
+  'application/xml-xhtml': 'html',
+  'application/xml-xhtml+xml': 'html',
+  'application/xml-xhtml+xml': 'html'
 };
 
 // File extension to file type mapping (fallback)
@@ -47,7 +61,15 @@ export const EXTENSION_MAP = {
   // JSON
   'json': 'json',
   // CSS
-  'css': 'css'
+  'css': 'css',
+  'sass': 'css',
+  'html': 'html',
+  'xquery': 'xquery',
+  'xql': 'xquery',
+  'xqm': 'xquery',
+  'xq': 'xquery',
+  'js': 'javascript',
+  'ts': 'javascript'
 };
 
 /**
