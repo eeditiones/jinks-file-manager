@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/eeditiones/jinks-file-manager/compare/v1.2.0...v1.3.0) (2025-12-30)
+
+
+### Features
+
+* support collection creation ([64fae18](https://github.com/eeditiones/jinks-file-manager/commit/64fae18fed057433f0e2e12dfc2d29fafbb2db26))
+
 # [1.2.0](https://github.com/eeditiones/jinks-file-manager/compare/v1.1.0...v1.2.0) (2025-12-29)
 
 
