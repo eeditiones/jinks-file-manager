@@ -126,6 +126,10 @@ class FileManager extends HTMLElement {
       ${iconsSvg}
       <div class="file-manager">
         <div class="toolbar">
+          <button class="btn-create-collection" title="Create collection">
+            <svg width="16" height="16" fill="currentColor"><use href="#icon-folder-plus"></use></svg>
+            New Collection
+          </button>
           <button class="btn-upload" title="Upload files">
             <svg width="16" height="16" fill="currentColor"><use href="#icon-upload"></use></svg>
             Upload
@@ -167,6 +171,10 @@ class FileManager extends HTMLElement {
         <input type="file" class="file-input" multiple style="display: none;">
       </div>
     `;
+    
+    // Setup create collection button
+    const createCollectionBtn = this.shadowRoot.querySelector('.btn-create-collection');
+    createCollectionBtn.addEventListener('click', () => this.performCreateCollection());
     
     // Setup upload button
     const uploadBtn = this.shadowRoot.querySelector('.btn-upload');
@@ -280,6 +288,38 @@ class FileManager extends HTMLElement {
     } catch (error) {
       console.error('Error uploading file:', error);
       this.showError(`Failed to upload file: ${error.message}`);
+      throw error;
+    }
+  }
+  
+  async createCollection(collectionPath, name) {
+    // API: POST /api/collections/{collection}?name={name}
+    const url = `${this.apiBase}/api/collections/${encodeURIComponent(collectionPath)}?name=${encodeURIComponent(name)}`;
+    
+    try {
+      const response = await fetch(url, {
+        method: 'POST'
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Create collection HTTP error:', response.status, errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText.substring(0, 100)}`);
+      }
+      
+      // API returns JSON
+      const result = await response.json();
+      
+      // Check for failure response
+      if (result.status === 'fail' && result.message) {
+        console.error('Create collection failed, response:', result);
+        throw new Error(result.message);
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Error creating collection:', error);
+      this.showError(`Failed to create collection: ${error.message}`);
       throw error;
     }
   }
@@ -1460,6 +1500,36 @@ class FileManager extends HTMLElement {
       this.showError(`Failed to delete item(s): ${error.message}`);
     } finally {
       loadingEl.style.display = 'none';
+    }
+  }
+  
+  async performCreateCollection() {
+    const collectionName = await this.showPrompt('Enter collection name:', '', 'info');
+    
+    if (!collectionName || !collectionName.trim()) return;
+    
+    const name = collectionName.trim();
+    
+    // Validate collection name (basic validation - no slashes, not empty)
+    if (name.includes('/') || name.includes('\\')) {
+      this.showError('Collection name cannot contain slashes');
+      return;
+    }
+    
+    try {
+      await this.createCollection(this.currentPath, name);
+      
+      // Clear cache and loaded ranges to force fresh load
+      this.cache.delete(this.currentPath);
+      this.loadedRanges = [];
+      this.items = [];
+      
+      // Refresh collection
+      await this.loadCollection(this.currentPath, false);
+      this.showMessage(`Collection "${name}" created successfully`);
+    } catch (error) {
+      console.error('Create collection error:', error);
+      // Error already shown in createCollection method
     }
   }
   
