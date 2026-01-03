@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/eeditiones/jinks-file-manager/compare/v1.3.1...v1.4.0) (2026-01-03)
+
+
+### Features
+
+* support range selection with shift-click; fix keyboard handlers ([1a905e9](https://github.com/eeditiones/jinks-file-manager/commit/1a905e91a15e3b2d1049382e7762a48ca0744a17))
+
 ## [1.3.1](https://github.com/eeditiones/jinks-file-manager/compare/v1.3.0...v1.3.1) (2025-12-30)
 
 
