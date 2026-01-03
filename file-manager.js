@@ -18,6 +18,7 @@ class FileManager extends HTMLElement {
     this.currentPath = this.root;
     this.items = [];
     this.selectedItems = new Set();
+    this.lastSelectedIndex = null; // Track last selected item index for range selection
     this.clipboard = null;
     this.clipboardMode = 'copy'; // 'copy' or 'cut'
     this.loadedRanges = [];
@@ -134,7 +135,7 @@ class FileManager extends HTMLElement {
             <svg width="16" height="16" fill="currentColor"><use href="#icon-upload"></use></svg>
             Upload
           </button>
-          <button class="btn-paste" disabled title="Paste (Ctrl+V)">
+          <button class="btn-paste" disabled title="Paste (Cmd+V / Ctrl+V)">
             <svg width="16" height="16" fill="currentColor"><use href="#icon-clipboard"></use></svg>
             Paste
           </button>
@@ -595,6 +596,7 @@ class FileManager extends HTMLElement {
       this.items = [];
       this.loadedRanges = [];
       this.selectedItems.clear();
+      this.lastSelectedIndex = null;
       gridContainer.innerHTML = '';
       emptyState.style.display = 'none';
       loadMoreContainer.style.display = 'none';
@@ -1047,6 +1049,7 @@ class FileManager extends HTMLElement {
       // Click outside - only clear if not holding modifier keys
       if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
         this.selectedItems.clear();
+        this.lastSelectedIndex = null;
         this.renderGrid();
       }
       this.hideContextMenu();
@@ -1106,7 +1109,11 @@ class FileManager extends HTMLElement {
     // If the right-clicked item is not selected, select it (but don't clear other selections if modifier is held)
     if (!this.selectedItems.has(path) && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
       this.selectedItems.clear();
+      this.lastSelectedIndex = null;
       this.selectedItems.add(path);
+      // Update last selected index
+      const clickedIndex = this.items.findIndex(i => (i.path || i.name) === path);
+      this.lastSelectedIndex = clickedIndex >= 0 ? clickedIndex : null;
       this.renderGrid();
     }
     
@@ -1114,59 +1121,82 @@ class FileManager extends HTMLElement {
   }
   
   handleKeyDown(e) {
-    // Only handle if file manager is focused or has selection
-    if (this.selectedItems.size === 0 && !this.shadowRoot.contains(document.activeElement)) {
-      return;
+    // Detect Mac platform (Cmd key) vs other platforms (Ctrl key)
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0 || 
+                  navigator.userAgent.toUpperCase().indexOf('MAC') >= 0;
+    
+    // Delete key (Delete on Windows/Linux, Backspace on Mac) - check first, no modifier needed
+    if (this.selectedItems.size > 0) {
+      if (e.key === 'Delete' || (isMac && e.key === 'Backspace')) {
+        e.preventDefault();
+        this.performDelete();
+        return;
+      }
     }
     
-    // Ctrl+C - Copy
-    if (e.ctrlKey && e.key === 'c' && !e.shiftKey && !e.altKey) {
-      e.preventDefault();
-      this.performCopy();
-      return;
-    }
-    
-    // Ctrl+X - Cut
-    if (e.ctrlKey && e.key === 'x' && !e.shiftKey && !e.altKey) {
-      e.preventDefault();
-      this.performCut();
-      return;
-    }
-    
-    // Ctrl+V - Paste
-    if (e.ctrlKey && e.key === 'v' && !e.shiftKey && !e.altKey) {
-      e.preventDefault();
-      this.performPaste();
-      return;
-    }
-    
-    // Delete key
-    if (e.key === 'Delete' && this.selectedItems.size > 0) {
-      e.preventDefault();
-      this.performDelete();
-      return;
-    }
-    
-    // F2 - Rename
+    // F2 - Rename - check before modifier checks
     if (e.key === 'F2' && this.selectedItems.size === 1) {
       e.preventDefault();
       const path = Array.from(this.selectedItems)[0];
       this.performRename(path);
       return;
     }
-  }
-  
-  handlePaste(e) {
-    // Only handle if file manager is focused
-    if (!this.shadowRoot.contains(document.activeElement) && this.selectedItems.size === 0) {
+    
+    // Check for correct modifier key (Cmd on Mac, Ctrl on others)
+    const hasModifier = isMac ? (e.metaKey && !e.ctrlKey) : (e.ctrlKey && !e.metaKey);
+    
+    if (!hasModifier || e.shiftKey || e.altKey) {
+      return; // Not our shortcut
+    }
+    
+    // Normalize key to lowercase for case-insensitive comparison
+    const key = e.key.toLowerCase();
+    
+    // Cmd/Ctrl+C - Copy (requires focus or selection)
+    if (key === 'c') {
+      if (this.selectedItems.size === 0 && !this.shadowRoot.contains(document.activeElement)) {
+        return;
+      }
+      e.preventDefault();
+      this.performCopy();
       return;
     }
     
-    // Check if we have internal clipboard
-    if (this.clipboard) {
+    // Cmd/Ctrl+X - Cut (requires focus or selection)
+    if (key === 'x') {
+      if (this.selectedItems.size === 0 && !this.shadowRoot.contains(document.activeElement)) {
+        return;
+      }
       e.preventDefault();
-      this.performPaste();
+      this.performCut();
+      return;
     }
+    
+    // Cmd/Ctrl+V - Paste (works if we have clipboard, even without focus)
+    if (key === 'v') {
+      if (this.clipboard) {
+        e.preventDefault();
+        this.performPaste();
+        return;
+      }
+    }
+  }
+  
+  handlePaste(e) {
+    // Only handle if we have internal clipboard
+    if (!this.clipboard) {
+      return;
+    }
+    
+    // Allow paste if file manager is focused or has selection, or if clipboard exists
+    // (this allows paste even when clicking elsewhere after copying)
+    if (!this.shadowRoot.contains(document.activeElement) && this.selectedItems.size === 0) {
+      // Still allow if we have clipboard - user might have clicked elsewhere
+      // but wants to paste into the file manager
+    }
+    
+    e.preventDefault();
+    this.performPaste();
   }
   
   handleFileSelect(e) {
@@ -1249,21 +1279,51 @@ class FileManager extends HTMLElement {
   }
   
   toggleSelection(path, e = null) {
+    // Find the index of the clicked item
+    const clickedIndex = this.items.findIndex(i => (i.path || i.name) === path);
+    
     if (this.selectedItems.has(path)) {
       if (e && (e.ctrlKey || e.metaKey)) {
         // Allow deselecting with Ctrl/Cmd
         this.selectedItems.delete(path);
+        // Update last selected index if this was the last selected item
+        if (this.lastSelectedIndex === clickedIndex) {
+          // Find the last selected item index
+          const selectedIndices = this.items
+            .map((item, idx) => this.selectedItems.has(item.path || item.name) ? idx : -1)
+            .filter(idx => idx !== -1);
+          this.lastSelectedIndex = selectedIndices.length > 0 ? selectedIndices[selectedIndices.length - 1] : null;
+        }
       } else {
         // Keep selected if clicking again without modifier
         return;
       }
     } else {
       // Adding new selection
-      if (!e || (!e.shiftKey && !e.ctrlKey && !e.metaKey)) {
-        // No modifier keys - clear existing selection
-        this.selectedItems.clear();
+      if (e && e.shiftKey && this.lastSelectedIndex !== null) {
+        // Shift+Click: Select range from last selected to current
+        const startIndex = Math.min(this.lastSelectedIndex, clickedIndex);
+        const endIndex = Math.max(this.lastSelectedIndex, clickedIndex);
+        
+        // Select all items in the range
+        for (let i = startIndex; i <= endIndex; i++) {
+          if (i >= 0 && i < this.items.length) {
+            const item = this.items[i];
+            const itemPath = item.path || item.name;
+            this.selectedItems.add(itemPath);
+          }
+        }
+        // Update last selected index to the clicked item
+        this.lastSelectedIndex = clickedIndex;
+      } else {
+        // No modifier keys or Ctrl/Cmd - clear existing selection
+        if (!e || (!e.shiftKey && !e.ctrlKey && !e.metaKey)) {
+          this.selectedItems.clear();
+        }
+        this.selectedItems.add(path);
+        // Update last selected index
+        this.lastSelectedIndex = clickedIndex;
       }
-      this.selectedItems.add(path);
     }
     this.renderGrid();
   }
@@ -1494,6 +1554,7 @@ class FileManager extends HTMLElement {
       // Refresh collection
       await this.loadCollection(deletePath, false);
       this.selectedItems.clear();
+      this.lastSelectedIndex = null;
       this.showMessage(`Deleted ${itemsToDelete.length} item(s)`);
     } catch (error) {
       console.error('Delete error:', error);
@@ -1652,7 +1713,10 @@ class FileManager extends HTMLElement {
         // If the right-clicked item is not selected, select only it
         if (!this.selectedItems.has(path)) {
           this.selectedItems.clear();
+          this.lastSelectedIndex = null;
           this.selectedItems.add(path);
+          const clickedIndex = this.items.findIndex(i => (i.path || i.name) === path);
+          this.lastSelectedIndex = clickedIndex >= 0 ? clickedIndex : null;
           this.renderGrid();
         }
         this.performCopy();
@@ -1661,7 +1725,10 @@ class FileManager extends HTMLElement {
         // If the right-clicked item is not selected, select only it
         if (!this.selectedItems.has(path)) {
           this.selectedItems.clear();
+          this.lastSelectedIndex = null;
           this.selectedItems.add(path);
+          const clickedIndex = this.items.findIndex(i => (i.path || i.name) === path);
+          this.lastSelectedIndex = clickedIndex >= 0 ? clickedIndex : null;
           this.renderGrid();
         }
         this.performCut();
@@ -1676,7 +1743,10 @@ class FileManager extends HTMLElement {
         // If the right-clicked item is not selected, select only it
         if (!this.selectedItems.has(path)) {
           this.selectedItems.clear();
+          this.lastSelectedIndex = null;
           this.selectedItems.add(path);
+          const clickedIndex = this.items.findIndex(i => (i.path || i.name) === path);
+          this.lastSelectedIndex = clickedIndex >= 0 ? clickedIndex : null;
           this.renderGrid();
         }
         this.performRename(path);
@@ -1686,7 +1756,10 @@ class FileManager extends HTMLElement {
         // Otherwise, keep all selected items for bulk delete
         if (!this.selectedItems.has(path)) {
           this.selectedItems.clear();
+          this.lastSelectedIndex = null;
           this.selectedItems.add(path);
+          const clickedIndex = this.items.findIndex(i => (i.path || i.name) === path);
+          this.lastSelectedIndex = clickedIndex >= 0 ? clickedIndex : null;
           this.renderGrid();
         }
         // performDelete will use all selected items
