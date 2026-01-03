@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/eeditiones/jinks-file-manager/compare/v1.3.0...v1.3.1) (2025-12-30)
+
+
+### Bug Fixes
+
+* wrong icon name for javascript files ([e3a1358](https://github.com/eeditiones/jinks-file-manager/commit/e3a135845eeb807c2f82277804b622fb237d878b))
+
 # [1.3.0](https://github.com/eeditiones/jinks-file-manager/compare/v1.2.0...v1.3.0) (2025-12-30)
 
 
